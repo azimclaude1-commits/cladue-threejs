@@ -11,7 +11,11 @@ on a small island, and a little canopy boat. The river is a wobbly **jelly**, no
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # static build in dist/
+npm run build:single  # one self-contained file: jelly-river.html
 ```
+
+`jelly-river.html` is the whole scene in a single HTML file, with three.js inlined. Open it
+straight from disk (no server needed).
 
 ## Interaction
 
