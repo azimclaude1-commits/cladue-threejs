@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>秋日果冻河 · Jelly River Diorama</title>
+    <style>
+      :root {
+        --ink: #5b4034;
+        --panel: rgba(255, 250, 245, 0.78);
+        --accent: #ff6a3d;
+        --teal: #2bb3ab;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #f4e7dc; }
+      body { font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif; color: var(--ink); }
+      #app { position: fixed; inset: 0; }
+      #app canvas { display: block; touch-action: none; }
+      body.over-water #app canvas { cursor: pointer; }
+      body.pressing #app canvas { cursor: grabbing; }
+
+      .title {
+        position: fixed; left: 24px; top: 20px; pointer-events: none;
+      }
+      .title h1 { margin: 0; font-size: 22px; letter-spacing: 2px; font-weight: 600; }
+      .title p { margin: 6px 0 0; font-size: 13px; opacity: 0.75; line-height: 1.6; }
+
+      .panel {
+        position: fixed; right: 20px; bottom: 20px; width: 236px;
+        background: var(--panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border-radius: 18px; padding: 14px 16px 12px; box-shadow: 0 10px 30px rgba(120, 70, 40, 0.15);
+        font-size: 13px;
+      }
+      .panel header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 600; }
+      .panel header button { border: 0; background: none; color: var(--ink); cursor: pointer; font-size: 16px; padding: 0 2px; }
+      body.ui-collapsed .panel .body { display: none; }
+      body.ui-collapsed .panel header { margin-bottom: 0; }
+      .btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+      .btns button {
+        border: 0; border-radius: 12px; padding: 8px 0; cursor: pointer; font: inherit; font-size: 12.5px;
+        background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(120, 70, 40, 0.12);
+        transition: transform 0.12s ease, background 0.12s ease;
+      }
+      .btns button:hover { background: #fff3ea; }
+      .btns button:active { transform: scale(0.94); }
+      label { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 8px; margin: 6px 0; }
+      input[type='range'] { width: 100%; accent-color: var(--teal); }
+      @media (max-width: 560px) {
+        .title { left: 16px; top: 14px; }
+        .title h1 { font-size: 18px; }
+        .title p { font-size: 12px; }
+        .panel { left: 16px; right: 16px; bottom: 16px; width: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="title">
+      <h1>秋日果冻河</h1>
+      <p>按住水面可以按压果冻 · 拖动画面旋转视角<br />双击水面丢下一颗小球</p>
+    </div>
+    <div class="panel">
+      <header><span>果冻水面</span><button id="btn-toggle" title="收起/展开">▾</button></header>
+      <div class="body">
+        <div class="btns">
+          <button id="btn-shake">摇一摇</button>
+          <button id="btn-ball">丢小球</button>
+          <button id="btn-leaf">落叶</button>
+        </div>
+        <label>弹性<input id="sl-stiff" type="range" min="2" max="45" step="0.5" /></label>
+        <label>阻尼<input id="sl-damp" type="range" min="0.3" max="5" step="0.1" /></label>
+        <label>张力<input id="sl-tension" type="range" min="0.4" max="5" step="0.1" /></label>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
