@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pirate Jelly — Material Studies</title>
+<style>
+  :root {
+    --bg: #e9e3d8; --ink: #1f1b16; --ink-2: #5f574c; --rule: rgba(31, 27, 22, 0.14);
+    --glass: rgba(250, 246, 239, 0.62); --glass-edge: rgba(255, 255, 255, 0.7); --accent: #0f9d94; --btn: rgba(255, 255, 255, 0.55);
+    --serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Songti SC', 'STSong', serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  body.night {
+    --bg: #0c0f1c; --ink: #ece6da; --ink-2: #a39d93; --rule: rgba(236, 230, 218, 0.16);
+    --glass: rgba(18, 22, 38, 0.58); --glass-edge: rgba(255, 255, 255, 0.1); --btn: rgba(255, 255, 255, 0.07);
+  }
+  body[data-flavour='rum'] { --accent: #d4841f; }
+  body[data-flavour='kraken'] { --accent: #8a55d6; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden; }
+  body { font-family: var(--sans); -webkit-font-smoothing: antialiased; transition: background 0.6s ease, color 0.6s ease; }
+  button, input { font: inherit; color: inherit; }
+  #gpu { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; touch-action: none; cursor: grab; }
+  body.dragging #gpu { cursor: grabbing; }
+
+  .mast { position: fixed; left: 32px; top: 28px; max-width: 420px; pointer-events: none; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--ink-2); display: flex; gap: 12px; align-items: center; }
+  .lang { pointer-events: auto; border: 1px solid var(--rule); background: var(--btn); border-radius: 999px; padding: 2px 10px; font-size: 11px; letter-spacing: 0.08em; cursor: pointer; }
+  h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(48px, 6vw, 84px); line-height: 0.9; letter-spacing: -0.02em; margin: 14px 0 12px; }
+  h1 .sl { color: var(--accent); font-style: normal; margin: 0 0.05em; transition: color 0.4s; }
+  .copy { font-family: var(--serif); font-size: 16.5px; line-height: 1.5; margin: 0 0 14px; color: var(--ink-2); max-width: 34ch; }
+  :lang(zh-CN) .copy { max-width: 24em; font-size: 15px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 10px; border-radius: 999px; background: var(--glass); border: 1px solid var(--glass-edge); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 11px; letter-spacing: 0.08em; font-weight: 600; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: #2fa34a; box-shadow: 0 0 0 3px rgba(47, 163, 74, 0.2); }
+  .pill.paused i { background: #d39b22; box-shadow: 0 0 0 3px rgba(211, 155, 34, 0.2); }
+  .pill.off i { background: #c0442c; box-shadow: 0 0 0 3px rgba(192, 68, 44, 0.2); }
+
+  .panel { position: fixed; right: 22px; top: 22px; width: 296px; max-height: calc(100vh - 44px); overflow: auto; background: var(--glass); border: 1px solid var(--glass-edge); border-radius: 20px; padding: 18px 18px 14px; backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); box-shadow: 0 20px 60px -30px rgba(40, 30, 20, 0.45); transition: background 0.6s; }
+  .sheet-handle { display: none; }
+  .ph { font-family: var(--serif); font-style: italic; font-size: 21px; margin: 0 0 10px; }
+  .sec + .sec { border-top: 1px solid var(--rule); margin-top: 14px; padding-top: 14px; }
+  .row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+  .btn { border: 1px solid var(--rule); background: var(--btn); border-radius: 11px; padding: 8px 6px; cursor: pointer; font-size: 12.5px; white-space: nowrap; transition: transform 0.12s ease, background 0.2s; }
+  .btn:hover { background: color-mix(in srgb, var(--btn) 60%, var(--accent) 12%); }
+  .btn:active { transform: scale(0.96); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .seg .btn[aria-pressed='true'] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .label { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); display: flex; justify-content: space-between; margin: 12px 0 7px; }
+  :lang(zh-CN) .label { letter-spacing: 0.08em; }
+  .label output { letter-spacing: 0.02em; text-transform: none; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .meter { height: 6px; border-radius: 6px; background: var(--rule); overflow: hidden; }
+  .meter b { display: block; height: 100%; width: 10%; background: linear-gradient(90deg, var(--accent), #f2c14e); border-radius: 6px; transition: width 0.25s linear; }
+  .tally { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 10px; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .tally div { padding: 8px 10px; }
+  .tally div + div { border-left: 1px solid var(--rule); }
+  .tally dt { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+  .tally dd { margin: 2px 0 0; font-family: var(--serif); font-size: 22px; font-variant-numeric: tabular-nums; }
+  input[type='range'] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .ticks { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--ink-2); margin-top: 4px; letter-spacing: 0.04em; }
+  .foot { margin-top: 14px; }
+
+  .how { position: fixed; left: 32px; bottom: 24px; max-width: 330px; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); pointer-events: none; }
+  .how b { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 16px; color: var(--ink); margin-bottom: 3px; }
+
+  .loading, .fallback { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; }
+  .loading { font-size: 11px; letter-spacing: 0.24em; color: var(--ink-2); text-transform: uppercase; }
+  .loading span::after { content: ''; animation: dots 1.4s steps(4) infinite; }
+  @keyframes dots { 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+  [hidden] { display: none !important; }
+  body.unavailable .panel, body.unavailable .how { display: none; }
+  .fallback { pointer-events: auto; padding: 20px; }
+  .card { max-width: 440px; text-align: center; background: var(--glass); border: 1px solid var(--glass-edge); border-radius: 22px; padding: 30px 28px; backdrop-filter: blur(12px); }
+  .card .art { width: 150px; height: 110px; margin: 0 auto 18px; border-radius: 16px; background: linear-gradient(180deg, #8fd6cf 0 58%, #e9d29a 58% 70%, #6b3f22 70% 80%, #2e1a10 80%); position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+  .card .art::before { content: ''; position: absolute; left: 30px; top: 22px; width: 60px; height: 34px; border-radius: 50% 50% 8px 8px; background: #e8cf95; box-shadow: 52px 10px 0 -10px #2a2a2a; }
+  .card h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 27px; margin: 0 0 8px; }
+  .card p { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+
+  @media (max-width: 760px) {
+    .mast { left: 18px; top: 16px; right: 18px; }
+    h1 { font-size: 46px; margin: 10px 0 6px; }
+    .copy { font-size: 14px; margin-bottom: 10px; }
+    .how { display: none; }
+    .panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 52vh; border-radius: 20px 20px 0 0; padding: 8px 16px 18px; transform: translateY(calc(100% - 52px)); transition: transform 0.35s cubic-bezier(.2,.8,.2,1), background 0.6s; }
+    body.sheet-open .panel { transform: none; }
+    .sheet-handle { display: flex; justify-content: space-between; align-items: center; width: 100%; border: 0; background: none; padding: 8px 2px 12px; cursor: pointer; font-family: var(--serif); font-style: italic; font-size: 18px; }
+    .sheet-handle::after { content: ''; width: 34px; height: 4px; border-radius: 4px; background: var(--rule); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body data-flavour="turquoise">
+<canvas id="gpu"></canvas>
+<header class="mast">
+  <div class="eyebrow"><span data-i18n="eyebrow">MATERIAL STUDIES</span><button class="lang" id="lang" data-i18n="lang">中文</button></div>
+  <h1><span data-i18n="title1">Pirate</span><span class="sl">/</span><br /><span data-i18n="title2">Jelly.</span></h1>
+  <p class="copy" data-i18n="copy">A cove set in turquoise jelly.</p>
+  <div class="pill" id="pill"><i></i><span id="pillText" data-i18n="loading">Setting the jelly</span></div>
+</header>
+
+<aside class="panel" id="panel">
+  <button class="sheet-handle" id="sheet"><span data-i18n="sheet">Controls</span></button>
+  <section class="sec">
+    <h2 class="ph" data-i18n="cove">The cove</h2>
+    <div class="row">
+      <button class="btn primary" id="bFire" data-i18n="fire">Fire a gun</button>
+      <button class="btn" id="bCoins" data-i18n="coins">Doubloons</button>
+      <button class="btn" id="bBarrel" data-i18n="barrel">Barrel</button>
+    </div>
+    <div class="label"><span data-i18n="lively">Liveliness</span></div>
+    <div class="meter"><b id="meter"></b></div>
+    <dl class="tally">
+      <div><dt data-i18n="shots">Shots</dt><dd id="tShots">0</dd></div>
+      <div><dt data-i18n="afloat">Afloat</dt><dd id="tAfloat">0</dd></div>
+      <div><dt data-i18n="sunk">Sunk</dt><dd id="tSunk">0</dd></div>
+    </dl>
+  </section>
+  <section class="sec">
+    <h2 class="ph" data-i18n="flavour">Flavour</h2>
+    <div class="row seg" id="flavours">
+      <button class="btn" data-flavour="turquoise" aria-pressed="true" data-i18n="turquoise">Turquoise</button>
+      <button class="btn" data-flavour="rum" aria-pressed="false" data-i18n="rum">Rum</button>
+      <button class="btn" data-flavour="kraken" aria-pressed="false" data-i18n="kraken">Kraken</button>
+    </div>
+    <div class="label"><span data-i18n="firmness">Firmness</span><output id="oFirm"></output></div>
+    <input type="range" id="sFirm" min="0" max="1" step="0.01" value="0.5" />
+    <div class="label"><span data-i18n="damping">Wave damping</span><output id="oDamp"></output></div>
+    <input type="range" id="sDamp" min="0" max="1" step="0.01" value="0.3" />
+    <div class="label"><span data-i18n="tod">Time of day</span><output id="oTod"></output></div>
+    <input type="range" id="sTod" min="0" max="1" step="0.001" value="0.12" />
+    <div class="ticks" id="ticks"></div>
+  </section>
+  <section class="sec foot">
+    <div class="row">
+      <button class="btn" id="bReset" data-i18n="reset">Reset</button>
+      <button class="btn" id="bPause" data-i18n="pause">Pause</button>
+      <button class="btn" id="bView" data-i18n="view">Reset view</button>
+    </div>
+  </section>
+</aside>
+
+<div class="how"><b data-i18n="howTitle">How to play</b><span data-i18n="how"></span></div>
+<div class="loading" id="loading"><span data-i18n="loading">Setting the jelly</span></div>
+<div class="fallback" id="fallback" hidden>
+  <div class="card"><div class="art"></div><h2 data-i18n="fallbackTitle">This study needs WebGPU.</h2><p data-i18n="fallbackBody"></p></div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
