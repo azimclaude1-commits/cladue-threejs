@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Whole Orange Jelly — Material Studies No. 032</title>
+<style>
+  :root {
+    --paper: #ece6dc;
+    --paper-2: #e3dccf;
+    --ink: #1d1a16;
+    --ink-2: #5d564d;
+    --rule: rgba(29, 26, 22, 0.16);
+    --accent: #e0661f;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Songti SC', 'STSong', 'Noto Serif CJK SC', serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--paper); color: var(--ink); }
+  body { font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  button, input { font: inherit; color: inherit; }
+
+  .page {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'mast stage' 'ctrl stage';
+    height: 100vh; height: 100dvh;
+  }
+  .mast { grid-area: mast; padding: 24px 28px 6px; border-right: 1px solid var(--rule); }
+  .ctrl { grid-area: ctrl; padding: 8px 28px 28px; border-right: 1px solid var(--rule); overflow-y: auto; min-height: 0; }
+  .stage { grid-area: stage; position: relative; min-height: 0; min-width: 0; overflow: hidden; background: #d9d3c9; }
+
+  .kicker { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+  .lang { border: 1px solid var(--rule); border-radius: 999px; background: transparent; padding: 3px 10px; font-size: 11px; letter-spacing: 0.08em; cursor: pointer; }
+  .lang:hover { background: var(--paper-2); }
+  h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(44px, 5vw, 68px); line-height: 0.92; letter-spacing: -0.02em; margin: 18px 0 12px; }
+  h1 .slash { color: var(--accent); font-style: normal; margin: 0 0.06em; }
+  .caption { font-family: var(--serif); font-size: 17px; line-height: 1.45; margin: 0 0 16px; color: #3a342d; max-width: 30ch; }
+  :lang(zh-CN) .caption { max-width: 22em; font-size: 16px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px 4px 9px; font-size: 10.5px; letter-spacing: 0.16em; font-weight: 600; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: #2fa34a; box-shadow: 0 0 0 3px rgba(47, 163, 74, 0.18); animation: pulse 2.2s ease-in-out infinite; }
+  .pill.off i { background: #b5432c; box-shadow: 0 0 0 3px rgba(181, 67, 44, 0.18); animation: none; }
+  .pill.wait i { background: #d39b22; box-shadow: 0 0 0 3px rgba(211, 155, 34, 0.2); }
+  @keyframes pulse { 50% { opacity: 0.45; } }
+
+  .group { padding: 12px 0; border-top: 1px solid var(--rule); }
+  .label { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 9px; display: flex; justify-content: space-between; }
+  .label output { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; color: var(--ink); }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; gap: 3px; }
+  .seg button { border: 0; background: transparent; border-radius: 7px; padding: 7px 6px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+  .seg button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .seg button:not([aria-pressed='true']):hover { background: var(--paper-2); }
+  .slider { margin-bottom: 12px; }
+  .slider:last-child { margin-bottom: 0; }
+  input[type='range'] { width: 100%; accent-color: var(--accent); margin: 0; }
+  .actions { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 6px; }
+  .actions button { border: 1px solid var(--rule); background: transparent; border-radius: 10px; padding: 9px 6px; cursor: pointer; font-size: 13px; }
+  .actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .actions button:hover { filter: brightness(0.97); background-color: var(--paper-2); }
+  .actions button.primary:hover { background: #cf5a16; }
+  .toggles { display: flex; gap: 18px; margin-top: 12px; font-size: 13px; flex-wrap: wrap; }
+  .toggles label { display: inline-flex; gap: 7px; align-items: center; cursor: pointer; }
+  .toggles input { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; }
+  .readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+  .readouts div { background: var(--paper); padding: 10px 12px; }
+  .readouts dt { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); }
+  .readouts dd { margin: 3px 0 0; font-family: var(--serif); font-size: 24px; font-variant-numeric: tabular-nums; }
+  .readouts dd small { font-family: var(--sans); font-size: 11px; color: var(--ink-2); margin-left: 3px; }
+  details { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 14px; }
+  summary { cursor: pointer; font-family: var(--serif); font-style: italic; font-size: 18px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; font-style: normal; font-family: var(--sans); font-size: 18px; color: var(--ink-2); }
+  details[open] summary::after { content: '–'; }
+  .notes { font-size: 13px; line-height: 1.6; color: #3d372f; }
+  .notes p { margin: 10px 0; }
+  .notes b { font-weight: 600; color: var(--ink); }
+  .colophon { margin-top: 18px; font-size: 10.5px; letter-spacing: 0.1em; color: var(--ink-2); text-transform: uppercase; }
+
+  canvas { display: block; }
+  #gpu { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .stage[data-tool='knife'] #gpu { cursor: crosshair; }
+  .stage[data-tool='hand'] #gpu { cursor: grab; }
+  .stage.grabbing #gpu { cursor: grabbing; }
+  .hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 12px; letter-spacing: 0.04em; color: #4b443b; background: rgba(236, 230, 220, 0.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 7px 14px; border-radius: 999px; white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .plate { position: absolute; top: 18px; right: 20px; font-family: var(--serif); font-style: italic; font-size: 13px; color: rgba(29, 26, 22, 0.55); pointer-events: none; }
+  .toast { position: absolute; top: 18px; left: 50%; transform: translate(-50%, -8px); background: var(--ink); color: var(--paper); font-size: 12.5px; padding: 8px 14px; border-radius: 999px; opacity: 0; transition: all 0.25s ease; pointer-events: none; max-width: calc(100% - 32px); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; letter-spacing: 0.22em; color: var(--ink-2); }
+  .loading[hidden] { display: none; }
+  .loading span::after { content: ''; animation: dots 1.4s steps(4) infinite; }
+  @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+  .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
+  .fallback[hidden] { display: none; }
+  .fallback .wheel { width: min(44vmin, 260px); aspect-ratio: 1; border-radius: 50%; margin: 0 auto 26px; position: relative;
+    background:
+      radial-gradient(circle, #fff6e4 0 7%, transparent 7.5%),
+      repeating-conic-gradient(from 8deg, #f6a03a 0 30.2deg, #fbe6c4 30.2deg 32.7273deg),
+      #f08a2c;
+    box-shadow: 0 0 0 10px #fbf0dc, 0 0 0 16px #ef7d1d, 0 30px 50px -20px rgba(120, 60, 10, 0.45); opacity: 0.92; }
+  .fallback h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
+  .fallback p { max-width: 42ch; margin: 0 auto; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+  @media (max-width: 860px) {
+    .page { grid-template-columns: 100%; grid-template-rows: auto auto auto; grid-template-areas: 'mast' 'stage' 'ctrl'; height: auto; }
+    .mast, .ctrl { border-right: 0; padding-left: 16px; padding-right: 16px; }
+    .mast { padding-top: 18px; }
+    .stage { height: min(78vh, 118vw); min-height: 340px; }
+    h1 { font-size: clamp(44px, 13vw, 64px); margin-top: 14px; }
+    .ctrl { overflow: visible; padding-top: 14px; }
+    .hint { font-size: 11px; white-space: normal; text-align: center; width: max-content; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="mast">
+    <div class="kicker"><span data-i18n="kicker">Material Studies / No. 032</span><button class="lang" id="lang" data-i18n="lang">中文</button></div>
+    <h1><span data-i18n="title1">Whole</span><span class="slash">/</span><br /><span data-i18n="title2">Orange.</span></h1>
+    <p class="caption" data-i18n="caption">Eleven segments, set in jelly. Zest, pith and juice. Cut it as small as you like.</p>
+    <div class="pill wait" id="pill"><i></i><span id="pillText" data-i18n="live">WEBGPU · LIVE</span></div>
+  </header>
+
+  <main class="stage" id="stage" data-tool="hand">
+    <canvas id="gpu"></canvas>
+    <canvas id="overlay"></canvas>
+    <div class="plate">Fig. 032</div>
+    <div class="toast" id="toast"></div>
+    <div class="hint" id="hint" data-i18n="hintHand"></div>
+    <div class="loading" id="loading"><span data-i18n="loading">SETTING THE JELLY</span></div>
+    <div class="fallback" id="fallback" hidden>
+      <div>
+        <div class="wheel" aria-hidden="true"></div>
+        <h2 data-i18n="fallbackTitle">This study needs WebGPU.</h2>
+        <p data-i18n="fallbackBody"></p>
+      </div>
+    </div>
+  </main>
+
+  <section class="ctrl">
+    <div class="group">
+      <div class="label"><span data-i18n="tool">Tool</span></div>
+      <div class="seg" id="tools">
+        <button data-tool="hand" aria-pressed="true" data-i18n="hand">Hand</button>
+        <button data-tool="knife" aria-pressed="false" data-i18n="knife">Knife</button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="label"><span data-i18n="variety">Variety</span></div>
+      <div class="seg" id="varieties">
+        <button data-variety="navel" aria-pressed="true" data-i18n="navel">Navel</button>
+        <button data-variety="blood" aria-pressed="false" data-i18n="blood">Blood</button>
+        <button data-variety="caracara" aria-pressed="false" data-i18n="caracara">Cara Cara</button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="slider">
+        <div class="label"><span data-i18n="firmness">Firmness</span><output id="firmOut"></output></div>
+        <input type="range" id="firm" min="0" max="1" step="0.01" value="0.55" />
+      </div>
+      <div class="slider">
+        <div class="label"><span data-i18n="damping">Internal damping</span><output id="dampOut"></output></div>
+        <input type="range" id="damp" min="0" max="1" step="0.01" value="0.45" />
+      </div>
+    </div>
+    <div class="group">
+      <div class="actions">
+        <button class="primary" id="nudge" data-i18n="nudge">Give it a nudge</button>
+        <button id="reset" data-i18n="reset">Reset</button>
+        <button id="pause" data-i18n="pause">Pause</button>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="slow" /><span data-i18n="quarter">¼ speed</span></label>
+        <label><input type="checkbox" id="mesh" /><span data-i18n="mesh">Show mesh</span></label>
+      </div>
+    </div>
+    <div class="group">
+      <dl class="readouts">
+        <div><dt data-i18n="mass">Mass</dt><dd><span id="rMass">—</span><small data-i18n="massUnit">g</small></dd></div>
+        <div><dt data-i18n="volume">Volume</dt><dd><span id="rVol">—</span><small data-i18n="volumeUnit">% of rest</small></dd></div>
+        <div><dt data-i18n="kinetic">Kinetic</dt><dd><span id="rKe">—</span><small data-i18n="keUnit">mJ</small></dd></div>
+        <div><dt data-i18n="pieces">Pieces</dt><dd><span id="rPieces">—</span></dd></div>
+      </dl>
+      <details>
+        <summary data-i18n="inside">Inside the experiment</summary>
+        <div class="notes" data-i18n-html="notes"></div>
+      </details>
+      <div class="colophon">1 unit ≈ 3 cm · 1.3 g/cm³</div>
+    </div>
+  </section>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
