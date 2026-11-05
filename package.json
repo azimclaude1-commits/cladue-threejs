@@ -11,7 +11,9 @@
     "dev:orange": "vite --config 切果冻橙子/vite.config.js",
     "build:orange": "vite build --config 切果冻橙子/vite.config.js && node -e \"require('fs').copyFileSync('切果冻橙子/dist/index.html','切果冻橙子/whole-orange-jelly.html')\"",
     "dev:pirate": "vite --config 海盗果冻岛屿/vite.config.js",
-    "build:pirate": "vite build --config 海盗果冻岛屿/vite.config.js && node -e \"require('fs').copyFileSync('海盗果冻岛屿/dist/index.html','海盗果冻岛屿/pirate-jelly.html')\""
+    "build:pirate": "vite build --config 海盗果冻岛屿/vite.config.js && node -e \"require('fs').copyFileSync('海盗果冻岛屿/dist/index.html','海盗果冻岛屿/pirate-jelly.html')\"",
+    "dev:harbour": "vite --config 像素港/vite.config.js",
+    "build:harbour": "vite build --config 像素港/vite.config.js && node -e \"require('fs').copyFileSync('像素港/dist/index.html','像素港/polgran-quay.html')\""
   },
   "dependencies": {
     "three": "^0.170.0"

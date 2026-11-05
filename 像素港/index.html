@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Polgran Quay — a pixel fishing harbour</title>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+  :root { --ink: #e9ebe4; --dim: #a5acb6; --panel: #101834; --edge: #3b7cb0; --gold: #f6d36c; --green: #97b951; --red: #e67156; --font: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0a1729; color: var(--ink); font-family: var(--font); overflow: hidden; }
+  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; image-rendering: pixelated; touch-action: none; cursor: pointer; }
+  .panel { position: fixed; background: var(--panel); border: 2px solid var(--ink); box-shadow: 0 0 0 2px var(--panel), 4px 4px 0 2px rgba(0, 0, 0, 0.45); padding: 8px 10px; font-size: 12px; line-height: 1.35; }
+  h1, h3 { margin: 0; font-weight: 700; letter-spacing: 0.08em; }
+  #title { left: 12px; top: 12px; max-width: 360px; }
+  #title h1 { font-size: 17px; color: var(--gold); text-shadow: 2px 2px 0 #66181d; }
+  #title .sub { color: var(--dim); font-size: 11px; margin-top: 2px; }
+  #title .row { display: flex; gap: 10px; align-items: baseline; margin-top: 6px; }
+  #clock { font-size: 20px; color: var(--ink); letter-spacing: 0.06em; }
+  #cond { color: #80b8dc; font-size: 11px; }
+  #score { right: 12px; top: 12px; width: 300px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+  #score h3 { grid-column: 1 / -1; font-size: 11px; color: var(--dim); margin-bottom: 4px; }
+  #score .k { font-size: 10px; color: var(--dim); letter-spacing: 0.1em; }
+  #score .v { font-size: 13px; color: var(--gold); }
+  #score .s { font-size: 10px; color: var(--dim); }
+  #log { right: 12px; top: 108px; width: 300px; }
+  #log h3, #boats h3 { font-size: 11px; color: var(--dim); margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th { text-align: left; color: var(--dim); font-weight: 400; border-bottom: 1px dashed #3b7cb0; padding: 1px 2px; }
+  td { padding: 1px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+  tr.kept td:last-child { color: var(--green); } tr.released td:last-child { color: var(--gold); } tr.junk td:last-child { color: var(--dim); } tr.snapped td:last-child { color: var(--red); }
+  td.empty { color: var(--dim); font-style: italic; }
+  #boats { right: 12px; top: 330px; width: 300px; }
+  .boat { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+  .boat b { color: var(--gold); font-weight: 400; } .boat span { color: var(--ink); text-align: right; }
+  #ticker { left: 12px; right: 12px; bottom: 12px; height: 30px; overflow: hidden; padding: 6px 0; white-space: nowrap; }
+  #tickerText { display: inline-block; padding-left: 100%; animation: scroll 38s linear infinite; color: var(--ink); }
+  @keyframes scroll { to { transform: translateX(-100%); } }
+  #controls { left: 12px; bottom: 54px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px; max-width: calc(100vw - 24px); }
+  #controls .grp { display: flex; gap: 3px; }
+  #controls .sep { width: 2px; height: 22px; background: #3b7cb0; }
+  button { font: inherit; font-size: 11px; color: var(--ink); background: #19375a; border: 2px solid #80b8dc; padding: 4px 7px; cursor: pointer; letter-spacing: 0.05em; box-shadow: 2px 2px 0 #0a1729; }
+  button:hover { background: #224b77; }
+  button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #0a1729; }
+  button.on { background: var(--gold); color: #2b1911; border-color: #fbfbf5; }
+  #hint { left: 50%; transform: translateX(-50%); top: 12px; font-size: 11px; color: var(--dim); padding: 4px 8px; max-width: calc(100vw - 720px); text-align: center; }
+  #labels { position: fixed; inset: 0; pointer-events: none; }
+  .pop { position: absolute; left: 0; top: 0; font-size: 12px; font-weight: 700; white-space: nowrap; text-shadow: 1px 0 0 #0b0d12, -1px 0 0 #0b0d12, 0 1px 0 #0b0d12, 0 -1px 0 #0b0d12, 2px 2px 0 #0b0d12; }
+  .tabs { display: none; }
+  #err { display: none; position: fixed; inset: 0; place-items: center; text-align: center; padding: 20px; color: var(--ink); }
+  @media (max-width: 1100px) { #hint { display: none; } }
+  @media (max-width: 760px) {
+    .panel { font-size: 11px; }
+    #title { left: 8px; top: 8px; right: 8px; max-width: none; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    #title h1 { font-size: 14px; } #title .sub { display: none; } #title .row { margin: 0; flex-direction: column; align-items: flex-end; gap: 0; } #clock { font-size: 15px; } #cond { font-size: 10px; }
+    #score { left: 8px; right: 8px; top: 58px; width: auto; padding: 5px 8px; } #score h3 { display: none; } #score .v { font-size: 13px; }
+    #log, #boats { display: none; left: 8px; right: 8px; width: auto; top: auto; bottom: 150px; max-height: 40vh; overflow: auto; }
+    body[data-tab='log'] #log, body[data-tab='boats'] #boats { display: block; }
+    .tabs { display: flex; gap: 3px; }
+    #controls { left: 8px; right: 8px; bottom: 48px; justify-content: center; }
+    #controls .sep { display: none; }
+    #ticker { left: 8px; right: 8px; bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<header id="title" class="panel">
+  <div><h1>POLGRAN QUAY</h1><div class="sub">a small Cornish fishing harbour, floating in the sky</div></div>
+  <div class="row"><span id="clock">06:30</span><span id="cond">Dawn · Breeze</span></div>
+</header>
+<div id="hint" class="panel">Tap the water to throw bread · tap an angler for fresh bait (or to strike) · tap the bell to call the boats · swipe or Q/E to turn</div>
+<section id="score" class="panel">
+  <h3>SCOREBOARD</h3>
+  <div><div class="k">BEST TODAY</div><div class="v" id="best">—</div><div class="s" id="bestBy">no fish yet</div></div>
+  <div><div class="k">LANDED</div><div class="v" id="landed">0.0 kg</div><div class="s" id="landedBy">0 by rod · 0 crates</div></div>
+</section>
+<section id="log" class="panel">
+  <h3>CATCH LOG</h3>
+  <table><thead><tr><th>Time</th><th>Angler</th><th>Catch</th><th>kg</th><th></th></tr></thead><tbody id="logBody"></tbody></table>
+</section>
+<section id="boats" class="panel"><h3>BOATS &amp; MARKET</h3><div id="boatList"></div></section>
+<nav id="controls" class="panel">
+  <div class="grp"><button id="bLeft" title="Turn left (Q)">⟲</button><button id="bRight" title="Turn right (E)">⟳</button><button id="bIn" title="Zoom in">+</button><button id="bOut" title="Zoom out">−</button><button id="bSlow" title="Slow motion (S)">SLOW</button></div>
+  <span class="sep"></span>
+  <div class="grp"><button data-time="dawn">DAWN</button><button data-time="noon">NOON</button><button data-time="dusk">DUSK</button><button data-time="night">NIGHT</button></div>
+  <span class="sep"></span>
+  <div class="grp"><button data-weather="calm">CALM</button><button data-weather="breeze">BREEZE</button><button data-weather="storm">STORM</button></div>
+  <div class="grp tabs"><button data-tab="log">LOG</button><button data-tab="boats">BOATS</button></div>
+</nav>
+<div id="ticker" class="panel"><span id="tickerText"></span></div>
+<div id="err"><div><h1 style="color:#f6d36c">POLGRAN QUAY</h1><p>This scene needs WebGL 2 and a connection to load three.js from jsDelivr.</p></div></div>
+<script type="module" src="./src/main.js"></script>
+<script>
+  window.addEventListener('error', (e) => { if (/three|WebGL|import/i.test(String(e.message))) document.getElementById('err').style.display = 'grid'; });
+</script>
+</body>
+</html>
