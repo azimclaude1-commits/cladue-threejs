@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>北冥有鱼</title>
+<meta name="description" content="鲲化为鹏：一段以《庄子·逍遥游》与《山海经》为意的水墨动画。" />
+<link rel="stylesheet" href="./src/font.css" />
+<style>
+  :root { --paper: #ece5d5; --ink: #1c1a17; --moon: #ece6d6; --gold: #e7c27c; --cinnabar: #a3301f; --vh: 1vh; --vw: 1vw; --u: min(calc(var(--vh) * 1), calc(var(--vw) * 0.9)); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0b0d0e; color: var(--moon); overflow: hidden; }
+  body { font-family: 'WenKai', 'LXGW WenKai', 'Kaiti SC', 'STKaiti', 'KaiTi', serif; -webkit-font-smoothing: antialiased; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { display: block; width: 100%; height: 100%; }
+  #overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+  /* captions: vertical, one column per phrase, right to left */
+  .cap { position: absolute; writing-mode: vertical-rl; display: flex; flex-direction: column; gap: calc(var(--u) * 1.6); font-size: calc(var(--u) * 4.4); line-height: 1; letter-spacing: 0.32em; }
+  .cap .col { display: block; white-space: nowrap; }
+  .cap span { display: inline-block; will-change: opacity, filter; }
+  .cap-right { right: 9%; top: 13%; }
+  .cap-left { left: 9%; top: 13%; }
+  .tone-moon { color: var(--moon); text-shadow: 0 0 calc(var(--u) * 1.6) rgba(150, 220, 215, 0.35), 0 0 2px rgba(0, 0, 0, 0.6); }
+  .tone-gold { color: var(--gold); text-shadow: 0 0 calc(var(--u) * 2) rgba(255, 190, 90, 0.45), 0 0 2px rgba(0, 0, 0, 0.5); }
+  .tone-ink { color: var(--ink); text-shadow: 0 0 calc(var(--u) * 1.4) rgba(255, 250, 235, 0.55); }
+  #overlay.light .tone-moon { color: var(--ink); text-shadow: 0 0 calc(var(--u) * 1.4) rgba(255, 250, 235, 0.7); }
+  #overlay.light .tone-gold { color: #8a2414; text-shadow: 0 0 calc(var(--u) * 1.6) rgba(255, 240, 210, 0.75); }
+
+  .cap-title, .cap-end { left: 60%; top: 50%; transform: translate(-50%, -54%); display: block; font-size: calc(var(--u) * 10); letter-spacing: 0.22em; text-shadow: none; }
+  .cap-end { font-size: calc(var(--u) * 9); }
+  .cap .sub { position: absolute; right: calc(100% + var(--u) * 3.5); top: 4%; white-space: nowrap; display: flex; flex-direction: column; gap: calc(var(--u) * 1.2); font-size: calc(var(--u) * 2.1); letter-spacing: 0.4em; color: #5a5248; }
+  .seal { display: grid; grid-template-columns: 1fr; writing-mode: horizontal-tb; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); background: var(--cinnabar); color: #f3e6d6; border-radius: calc(var(--u) * 0.5); font-size: calc(var(--u) * 2.5); line-height: 1; padding: calc(var(--u) * 0.6); box-shadow: inset 0 0 0 calc(var(--u) * 0.3) #f0d8c8, inset 0 0 calc(var(--u) * 1.2) rgba(0,0,0,0.25); letter-spacing: 0; align-self: flex-end; filter: url(#rough); }
+  .seal i { font-style: normal; display: flex; align-items: center; justify-content: center; }
+  .cap-title .seal, .cap-end .seal { position: absolute; right: calc(100% + var(--u) * 3); bottom: 2%; }
+  .seal-mark { position: absolute; right: 3.2%; bottom: 8%; width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2); font-size: calc(var(--u) * 1.6); opacity: 0; }
+
+  /* bestiary notes */
+  .note { position: absolute; bottom: 9%; writing-mode: vertical-rl; display: flex; gap: calc(var(--u) * 1); padding: calc(var(--u) * 1.4) calc(var(--u) * 1.1); max-height: 44%; border: 1px solid rgba(236, 230, 214, 0.45); outline: 1px solid rgba(236, 230, 214, 0.18); outline-offset: 3px; background: rgba(8, 14, 16, 0.25); color: rgba(236, 230, 214, 0.86); font-size: calc(var(--u) * 1.9); line-height: 1.75; letter-spacing: 0.18em; }
+  .note-l { left: 3.4%; } .note-r { right: 3.4%; bottom: 13%; max-height: 34%; }
+  .note .nt { white-space: nowrap; color: #f3e6d6; background: var(--cinnabar); padding: calc(var(--u) * 0.7) calc(var(--u) * 0.25); font-size: calc(var(--u) * 2); line-height: 1; letter-spacing: 0.3em; align-self: flex-start; }
+  .note .nb { white-space: normal; }
+  #overlay.light .note { color: rgba(28, 26, 23, 0.86); border-color: rgba(28, 26, 23, 0.4); outline-color: rgba(28, 26, 23, 0.15); background: rgba(240, 232, 214, 0.32); }
+
+  .chap { position: absolute; left: 3.4%; top: 8.5%; font-size: calc(var(--u) * 2); letter-spacing: 0.5em; opacity: 0; color: rgba(236, 230, 214, 0.8); display: flex; gap: 0.8em; align-items: baseline; }
+  .chap .cn { font-size: 0.8em; color: var(--gold); }
+  #overlay.light .chap { color: rgba(28, 26, 23, 0.8); }
+  #overlay.light .chap .cn { color: var(--cinnabar); }
+
+  /* start */
+  #start { position: fixed; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12vh; z-index: 5; transition: opacity 0.8s; }
+  #start.gone { opacity: 0; pointer-events: none; }
+  #start button { font: inherit; font-size: 20px; letter-spacing: 0.6em; padding: 12px 18px 12px 30px; color: var(--paper); background: var(--cinnabar); border: 0; border-radius: 4px; cursor: pointer; box-shadow: 0 6px 24px rgba(80, 20, 10, 0.25); }
+  #start button:hover { filter: brightness(1.08); }
+  #start p { position: absolute; bottom: 5vh; margin: 0; font-size: 13px; color: #6d6458; letter-spacing: 0.2em; }
+
+  /* controls */
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 26px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; background: linear-gradient(transparent, rgba(0, 0, 0, 0.45)); opacity: 0; transition: opacity 0.4s; z-index: 4; font-size: 13px; }
+  body.ui.running #bar, #bar:focus-within { opacity: 1; }
+  body:not(.running) #bar { display: none; }
+  #bar button { font: inherit; color: var(--moon); background: rgba(20, 22, 24, 0.55); border: 1px solid rgba(236, 230, 214, 0.25); border-radius: 4px; min-width: 34px; height: 30px; cursor: pointer; padding: 0 8px; }
+  #bar button:hover { border-color: var(--gold); color: var(--gold); }
+  #sound.off { text-decoration: line-through; opacity: 0.6; }
+  .track { position: relative; flex: 1; height: 30px; display: flex; align-items: center; }
+  #scrub { width: 100%; margin: 0; accent-color: var(--cinnabar); }
+  #ticks { position: absolute; left: 0; right: 0; top: -14px; height: 12px; }
+  .tick { position: absolute; transform: translateX(-2px); font: inherit; font-size: 11px; line-height: 12px; color: rgba(236, 230, 214, 0.75); background: none; border: 0; border-left: 1px solid rgba(236, 230, 214, 0.5); padding: 0 0 0 3px; cursor: pointer; white-space: nowrap; }
+  .tick:hover { color: var(--gold); }
+  #time { font-variant-numeric: tabular-nums; min-width: 78px; text-align: right; color: rgba(236, 230, 214, 0.8); }
+  @media (max-width: 640px) { .tick { font-size: 0; color: transparent; width: 6px; height: 10px; overflow: hidden; } #time { display: none; } .note { font-size: calc(var(--u) * 2.3); } }
+</style>
+</head>
+<body>
+  <div id="stage"><div id="overlay"></div></div>
+  <div id="start"><button type="button">开卷</button><p>点击开卷 · 有声 · 约八十六秒</p></div>
+  <div id="bar" role="toolbar" aria-label="播放控制">
+    <button id="play" type="button" aria-label="播放">▶</button>
+    <button id="restart" type="button" aria-label="重播" title="重播">↺</button>
+    <div class="track"><div id="ticks"></div><input id="scrub" type="range" min="0" max="1000" value="0" aria-label="进度" /></div>
+    <span id="time">0:00</span>
+    <button id="sound" type="button" aria-label="静音" title="声音 (M)">声</button>
+    <button id="full" type="button" aria-label="全屏" title="全屏 (F)">⛶</button>
+  </div>
+  <svg width="0" height="0" style="position:absolute"><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" /><feDisplacementMap in="SourceGraphic" scale="2.2" /></filter></svg>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

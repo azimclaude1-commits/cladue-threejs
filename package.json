@@ -13,7 +13,9 @@
     "dev:pirate": "vite --config 海盗果冻岛屿/vite.config.js",
     "build:pirate": "vite build --config 海盗果冻岛屿/vite.config.js && node -e \"require('fs').copyFileSync('海盗果冻岛屿/dist/index.html','海盗果冻岛屿/pirate-jelly.html')\"",
     "dev:harbour": "vite --config 像素港/vite.config.js",
-    "build:harbour": "vite build --config 像素港/vite.config.js && node -e \"require('fs').copyFileSync('像素港/dist/index.html','像素港/polgran-quay.html')\""
+    "build:harbour": "vite build --config 像素港/vite.config.js && node -e \"require('fs').copyFileSync('像素港/dist/index.html','像素港/polgran-quay.html')\"",
+    "dev:beiming": "vite --config 北冥有鱼/vite.config.js",
+    "build:beiming": "vite build --config 北冥有鱼/vite.config.js && node -e \"require('fs').copyFileSync('北冥有鱼/dist/index.html','北冥有鱼/beiming.html')\""
   },
   "dependencies": {
     "three": "^0.170.0"
