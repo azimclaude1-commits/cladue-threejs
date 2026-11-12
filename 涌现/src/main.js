@@ -16,7 +16,9 @@ import { Player, renderScore, wav } from './audio.js';
 const CAPTURE = !!window.__CAPTURE__;
 const Q = new URLSearchParams(location.search);
 const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-const quality = ['high', 'medium', 'low'].includes(Q.get('q')) ? Q.get('q') : (CAPTURE ? 'high' : coarse ? 'low' : 'high');
+let saved = null; try { saved = localStorage.getItem('emergence-quality'); } catch (e) { /* storage blocked */ }
+const pick = Q.get('q') || saved;
+const quality = ['high', 'medium', 'low'].includes(pick) ? pick : (CAPTURE ? 'high' : coarse ? 'low' : 'high');
 const TIER = {
   high: { p: 1024, birds: 40000, world: [220, 5, 9, 28, 44], pr: 1.5 },
   medium: { p: 724, birds: 24000, world: [170, 5, 8, 20, 32], pr: 1.25 },
@@ -261,9 +263,9 @@ if (!CAPTURE) {
   ui.scrub.addEventListener('input', () => { scrubbing = true; t = (Number(ui.scrub.value) / 1000) * DURATION; audioStop(); });
   ui.scrub.addEventListener('change', () => { scrubbing = false; seek(t); });
   ui.sound.addEventListener('click', () => { muted = !muted; ui.sound.classList.toggle('off', muted); if (muted) audioStop(); else audioStart(); });
-  ui.full.addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); });
+  ui.full.addEventListener('click', () => { try { const p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); p?.catch?.(() => {}); } catch (e) { /* not allowed here */ } });
   ui.hudBtn.addEventListener('click', () => document.body.classList.toggle('nohud'));
-  ui.q.addEventListener('change', () => { const u = new URL(location.href); u.searchParams.set('q', ui.q.value); location.href = u.toString(); });
+  ui.q.addEventListener('change', () => { try { localStorage.setItem('emergence-quality', ui.q.value); } catch (e) { /* storage blocked */ } const u = new URL(location.href); if (u.searchParams.has('q')) { u.searchParams.set('q', ui.q.value); location.href = u.toString(); } else location.reload(); });
   window.addEventListener('keydown', (e) => {
     if (!ui.start.classList.contains('gone')) { if (e.key === ' ' || e.key === 'Enter') { ui.start.querySelector('button').click(); e.preventDefault(); } return; }
     if (e.key === ' ') { setPlaying(!playing); e.preventDefault(); }
