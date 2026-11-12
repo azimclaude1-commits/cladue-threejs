@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>涌现 · Emergence</title>
+<meta name="description" content="一段完全由代码实时生成的影像与声音：混沌、规则、世界、生命、心智。" />
+<style>
+  :root { --fg: #ece9e4; --dim: rgba(236, 233, 228, 0.55); --accent: #f0c27a; --line: rgba(236, 233, 228, 0.22); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: var(--fg); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  body { font-family: "Helvetica Neue", "Inter", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+  #stage { position: fixed; inset: 0; touch-action: none; }
+  #stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  #stage canvas:active { cursor: grabbing; }
+  #overlay { position: absolute; inset: 0; pointer-events: none; }
+
+  .title { position: absolute; left: 50%; top: 66%; text-align: center; opacity: 0; }
+  .title .zh { font-size: clamp(44px, 9vmin, 96px); font-weight: 200; letter-spacing: 0.5em; margin-right: -0.5em; }
+  .title .en { font-size: clamp(11px, 1.6vmin, 15px); letter-spacing: 0.9em; margin-right: -0.9em; color: var(--dim); margin-top: 1.2em; }
+  .title .sub { font-size: clamp(11px, 1.5vmin, 14px); letter-spacing: 0.3em; color: var(--dim); margin-top: 3.2em; }
+
+  .card { position: absolute; left: clamp(18px, 5vw, 64px); bottom: clamp(70px, 13vh, 130px); max-width: min(520px, 80vw); opacity: 0; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6); }
+  .card .num { font-size: 13px; letter-spacing: 0.4em; color: var(--accent); }
+  .card .line { height: 1px; background: var(--fg); opacity: 0.6; width: calc(var(--k, 0) * 120px); margin: 12px 0 14px; }
+  .card .name { display: flex; align-items: baseline; gap: 16px; }
+  .card .name .zh { font-size: clamp(26px, 4.4vmin, 40px); font-weight: 300; letter-spacing: 0.25em; }
+  .card .name .en { font-size: 12px; letter-spacing: 0.55em; color: var(--dim); }
+  .card .desc { margin-top: 10px; font-size: clamp(12px, 1.7vmin, 15px); letter-spacing: 0.08em; color: var(--dim); line-height: 1.7; }
+
+  .coda { position: absolute; left: 50%; bottom: clamp(70px, 13vh, 120px); transform: translateX(-50%); width: 92vw; text-align: center; font-size: clamp(13px, 2vmin, 18px); letter-spacing: 0.35em; color: var(--fg); opacity: 0; font-weight: 300; }
+  .coda span { display: block; margin-top: 0.9em; font-size: 0.72em; letter-spacing: 0.3em; color: var(--dim); }
+
+  .hud { position: absolute; right: clamp(14px, 3vw, 32px); top: clamp(12px, 2.5vh, 26px); font-size: 11px; letter-spacing: 0.08em; color: rgba(236, 233, 228, 0.42); font-variant-numeric: tabular-nums; text-align: right; }
+  body.nohud .hud { display: none; }
+  body.capture .hud { display: none; }
+
+  #start { position: fixed; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(ellipse at center, rgba(0,0,0,0.25), rgba(0,0,0,0.85)); transition: opacity 0.9s; }
+  #start.gone { opacity: 0; pointer-events: none; }
+  #start .zh { font-size: clamp(44px, 10vmin, 104px); font-weight: 200; letter-spacing: 0.5em; margin-right: -0.5em; }
+  #start .en { font-size: 13px; letter-spacing: 0.9em; margin-right: -0.9em; color: var(--dim); }
+  #start .sub { font-size: 14px; letter-spacing: 0.2em; color: var(--dim); text-align: center; line-height: 1.9; padding: 0 16px; }
+  #start button { margin-top: 18px; font: inherit; font-size: 15px; letter-spacing: 0.4em; padding: 13px 30px 13px 36px; color: #111; background: var(--fg); border: 0; border-radius: 999px; cursor: pointer; }
+  #start button:hover { background: #fff; }
+  #start small { font-size: 12px; color: rgba(236, 233, 228, 0.4); letter-spacing: 0.15em; }
+  #warn { color: var(--accent); font-size: 12px; }
+
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; display: flex; align-items: center; gap: 10px; padding: 28px clamp(12px, 3vw, 28px) calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(0, 0, 0, 0.6)); opacity: 0; transition: opacity 0.35s; font-size: 12px; }
+  body.ui.running #bar, #bar:focus-within { opacity: 1; }
+  body:not(.running) #bar { display: none; }
+  #bar button, #bar select { font: inherit; color: var(--fg); background: rgba(255, 255, 255, 0.07); border: 1px solid var(--line); border-radius: 6px; height: 30px; min-width: 34px; padding: 0 9px; cursor: pointer; }
+  #bar button:hover, #bar select:hover { border-color: var(--accent); color: var(--accent); }
+  #bar select option { color: #111; }
+  #sound.off { opacity: 0.45; text-decoration: line-through; }
+  .track { position: relative; flex: 1; height: 30px; display: flex; align-items: center; }
+  #scrub { width: 100%; margin: 0; accent-color: var(--accent); }
+  #ticks { position: absolute; left: 0; right: 0; top: -15px; height: 13px; }
+  .tick { position: absolute; transform: translateX(-1px); font: inherit; font-size: 11px; line-height: 13px; color: var(--dim); background: none; border: 0; border-left: 1px solid var(--line); padding: 0 0 0 4px; cursor: pointer; }
+  .tick:hover { color: var(--accent); }
+  #time { min-width: 76px; text-align: right; color: var(--dim); font-variant-numeric: tabular-nums; }
+  @media (max-width: 680px) { #time, #quality, #hudbtn { display: none; } .card { bottom: 96px; } .hud { font-size: 10px; max-width: 60vw; } }
+</style>
+</head>
+<body>
+  <div id="stage"><div id="overlay"></div></div>
+  <div id="start">
+    <div class="zh">涌现</div>
+    <div class="en">EMERGENCE</div>
+    <div class="sub">一段完全由代码实时生成的影像与声音<br />混沌 · 规则 · 世界 · 生命 · 心智</div>
+    <button type="button">开始 ▶</button>
+    <small>约两分钟 · 建议戴耳机 · 可拖动画面</small>
+    <div id="warn"></div>
+  </div>
+  <div id="bar" role="toolbar" aria-label="播放控制">
+    <button id="play" type="button" aria-label="播放">▶</button>
+    <button id="restart" type="button" aria-label="重播" title="重播">↺</button>
+    <div class="track"><div id="ticks"></div><input id="scrub" type="range" min="0" max="1000" value="0" aria-label="进度" /></div>
+    <span id="time">0:00</span>
+    <select id="quality" aria-label="画质" title="画质"><option value="high">高</option><option value="medium">中</option><option value="low">低</option></select>
+    <button id="hudbtn" type="button" title="参数 (H)">参数</button>
+    <button id="sound" type="button" title="声音 (M)">声</button>
+    <button id="full" type="button" title="全屏 (F)">⛶</button>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

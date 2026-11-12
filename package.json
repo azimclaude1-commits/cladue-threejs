@@ -15,7 +15,9 @@
     "dev:harbour": "vite --config 像素港/vite.config.js",
     "build:harbour": "vite build --config 像素港/vite.config.js && node -e \"require('fs').copyFileSync('像素港/dist/index.html','像素港/polgran-quay.html')\"",
     "dev:beiming": "vite --config 北冥有鱼/vite.config.js",
-    "build:beiming": "vite build --config 北冥有鱼/vite.config.js && node -e \"require('fs').copyFileSync('北冥有鱼/dist/index.html','北冥有鱼/beiming.html')\""
+    "build:beiming": "vite build --config 北冥有鱼/vite.config.js && node -e \"require('fs').copyFileSync('北冥有鱼/dist/index.html','北冥有鱼/beiming.html')\"",
+    "dev:emergence": "vite --config 涌现/vite.config.js",
+    "build:emergence": "vite build --config 涌现/vite.config.js && node -e \"require('fs').copyFileSync('涌现/dist/index.html','涌现/emergence.html')\""
   },
   "dependencies": {
     "three": "^0.170.0"
