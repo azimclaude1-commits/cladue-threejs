@@ -161,7 +161,7 @@ function renderAt(t, opts = {}) {
   d.uSize.value = 1.15 * Math.max(1, PR);
   const pg = (TIER.p === 1024 ? 1 : (1024 / TIER.p) ** 2);
   const col = particles.sim.uniforms.uCollapse.value;
-  d.uGain.value = (t > T.dissolve ? 0.007 * (Math.pow(1 - col, 3) + 0.03) : 0.022 + 0.014 * kick) * pg;
+  d.uGain.value = (t > T.dissolve ? 0.0095 * (Math.pow(1 - col, 3) + 0.03) : 0.022 + 0.014 * kick) * pg;
   d.uAlpha.value = pVis;
   particles.points.visible = pVis > 0.001;
 
@@ -222,7 +222,13 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   frameMs = frameMs * 0.9 + dt * 1000 * 0.1;
-  if (playing && !scrubbing) { t += dt; if (t >= DURATION) { t -= DURATION; audioStart(); } }
+  if (playing && !scrubbing) {
+    if (player && player.synth && !muted && audioCtx) {
+      // the music is the clock: slow frames drop, they never drift out of time
+      t = Math.max(0, audioCtx.currentTime - player.base);
+      if (t >= DURATION) { t = 0; audioStart(); }
+    } else { t += dt; if (t >= DURATION) { t -= DURATION; audioStart(); } }
+  }
   renderAt(t);
   // keep the frame rate: trade resolution when the GPU struggles
   if (playing) {
@@ -275,8 +281,8 @@ if (!CAPTURE) {
   window.addEventListener('pointermove', onMove);
   window.addEventListener('pointerup', onUp);
   window.addEventListener('pointercancel', onUp);
-  // a still behind the start screen
-  t = 3.0;
+  // behind the start screen: darkness
+  t = 0;
   requestAnimationFrame(frame);
 } else {
   ui.start.remove(); ui.bar.remove();

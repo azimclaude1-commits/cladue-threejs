@@ -123,7 +123,7 @@ vec3 skyCol(vec3 rd) {
   float az = max(dot(dh, sh), 0.0);
   c += uGlow * pow(az, 5.0) * exp(-y * 7.0) + uGlow * 0.25 * exp(-y * 14.0);
   float sd = max(dot(rd, uSun), 0.0);
-  c += uSunCol * (smoothstep(0.99955, 0.9998, sd) * 30.0 + pow(sd, 24.0) * 0.18 + pow(sd, 4.0) * 0.025) * smoothstep(-0.03, 0.02, rd.y) * (1.0 - uStars);
+  c += uSunCol * (smoothstep(0.99955, 0.9998, sd) * 30.0 + pow(sd, 24.0) * 0.18 + pow(sd, 4.0) * 0.025) * smoothstep(-0.03, 0.02, rd.y) * (1.0 - smoothstep(0.0, 0.3, uStars));
   if (uStars > 0.0) {
     // stars on a sphere grid, and a faint river of them
     vec2 g = vec2(atan(rd.z, rd.x) * 180.0, asin(clamp(rd.y, -1.0, 1.0)) * 180.0);

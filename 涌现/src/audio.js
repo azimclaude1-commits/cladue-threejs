@@ -175,6 +175,7 @@ export class Player {
     const ctx = this.ctx, syn = new Synth(ctx, ctx.destination);
     this.synth = syn;
     const base = ctx.currentTime + 0.08 - from;
+    this.base = base;
     // things already sounding when we join
     for (const e of EVENTS) if (e.t < from && e.d && e.t + e.d > from + 0.2) syn.play(e, base + from, from - e.t);
     let i = EVENTS.findIndex((e) => e.t >= from); if (i < 0) i = EVENTS.length;
