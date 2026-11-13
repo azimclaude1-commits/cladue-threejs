@@ -17,9 +17,17 @@
     "dev:beiming": "vite --config 北冥有鱼/vite.config.js",
     "build:beiming": "vite build --config 北冥有鱼/vite.config.js && node -e \"require('fs').copyFileSync('北冥有鱼/dist/index.html','北冥有鱼/beiming.html')\"",
     "dev:emergence": "vite --config 涌现/vite.config.js",
-    "build:emergence": "vite build --config 涌现/vite.config.js && node -e \"require('fs').copyFileSync('涌现/dist/index.html','涌现/emergence.html')\""
+    "build:emergence": "vite build --config 涌现/vite.config.js && node -e \"require('fs').copyFileSync('涌现/dist/index.html','涌现/emergence.html')\"",
+    "dev:pagoda": "vite --config 宝塔岛/vite.config.js",
+    "build:pagoda": "vite build --config 宝塔岛/vite.config.js && node -e \"require('fs').copyFileSync('宝塔岛/dist/index.html','宝塔岛/pagoda-island.html')\""
   },
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@react-three/postprocessing": "^2.19.1",
+    "postprocessing": "^6.39.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "three": "^0.170.0"
   },
   "devDependencies": {

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>宝塔浮岛</title>
+<meta name="description" content="Three.js 与 React 搭建的体素微缩浮岛：五重塔、樱花、神龙、瀑布与日落。" />
+<style>
+  :root { color-scheme: dark; --ink: #fff7f1; --soft: rgba(255, 247, 241, 0.72); --glass: rgba(70, 34, 40, 0.28); --edge: rgba(255, 235, 225, 0.32); --on: #ffcf8a; }
+  * { box-sizing: border-box; }
+  html, body, #root { margin: 0; height: 100%; background: #e9a58f; overflow: hidden; }
+  body { font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  #root canvas { display: block; touch-action: none; }
+  .title { position: fixed; left: max(20px, env(safe-area-inset-left)); top: max(18px, env(safe-area-inset-top)); pointer-events: none; text-shadow: 0 2px 18px rgba(90, 30, 40, 0.45); }
+  .title h1 { margin: 0; font-size: clamp(24px, 3.4vw, 38px); font-weight: 600; letter-spacing: 0.32em; }
+  .title p { margin: 6px 0 0; font: 500 11px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.42em; color: var(--soft); text-transform: uppercase; }
+  .panel { position: fixed; right: max(16px, env(safe-area-inset-right)); top: max(16px, env(safe-area-inset-top)); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: min(420px, 62vw); }
+  .panel button { font: 500 12px/1 "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 0.12em; color: var(--soft); background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 8px 13px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: color 0.2s, border-color 0.2s, background 0.2s; }
+  .panel button.on { color: #3a1d14; background: var(--on); border-color: var(--on); }
+  .panel button:disabled { opacity: 0.4; cursor: default; }
+  .panel button:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
+  .hint { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); font: 400 12px/1.4 "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 0.18em; color: var(--soft); pointer-events: none; white-space: nowrap; text-shadow: 0 1px 10px rgba(80, 30, 30, 0.5); }
+  @media (max-width: 560px) { .title h1 { letter-spacing: 0.2em; } .panel { max-width: 56vw; } .panel button { padding: 7px 10px; font-size: 11px; } .hint { font-size: 11px; letter-spacing: 0.08em; } }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./src/main.jsx"></script>
+</body>
+</html>
